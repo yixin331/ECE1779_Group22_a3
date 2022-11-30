@@ -65,3 +65,19 @@ function checkImage(){
 
 
 }
+
+function hide(){
+    var beHidden = document.getElementById("beHidden");
+
+    if(beHidden.style.display=="none"){
+        beHidden.style.display=""
+
+    }
+    else{
+        beHidden.style.display="none"
+    }
+
+
+
+
+}
