@@ -41,7 +41,7 @@ def get():
                     aws_secret_access_key=aws_config['secret_access_key']
                 )
                 # s3 = boto3.client('s3')
-                bucket_name = '1779a2files'
+                bucket_name = '1779a3files'
                 file = s3.get_object(Bucket=bucket_name, Key=key)['Body']
                 file_byte = io.BytesIO(file.read())
                 # reload in cache
