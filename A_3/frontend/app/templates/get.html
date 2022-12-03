@@ -5,7 +5,6 @@
     <title>Get</title>
     <!-- change it to the css file it wants!-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/index.css') }}">
-
 </head>
 <script type="text/javascript" src="{{ url_for('static',filename='index.js') }}"></script>
 
@@ -17,11 +16,14 @@
     <table  border="1" >
         <tr>
           <td>
-              <h1>You can search for anything you want</h1></br>
-              <div class="search">
-                  <input id="getKey" type="text" name="key" class="searchTerm" placeholder="" />
-                  <button type="submit" class="searchButton" value="get" ><i class="fa fa-search"></i>></button>
-              </div>
+            <label for="getKey">Key:</label>
+            <input id="getKey" type="text" name="key" placeholder="" />
+            <input type="submit" value="get" />
+{#              <h1>You can search for anything you want</h1></br>#}
+{#              <div class="search">#}
+{#                  <input id="getKey" type="text" name="key" class="searchTerm" placeholder="" />#}
+{#                  <button type="submit" class="searchButton" value="get" ><i class="fa fa-search"></i>></button>#}
+{#              </div>#}
           </td>
         </tr>
         {% if user_image==None %}
