@@ -1,0 +1,103 @@
+<!-- index.html -->
+<html>
+  <head>
+    <link
+      href="https://unpkg.com/maplibre-gl@1.14.0/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+      }
+
+      #map {
+        height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- map container -->
+    <div id="map" />
+    <!-- JavaScript dependencies -->
+    <script src="https://unpkg.com/maplibre-gl@1.14.0/dist/maplibre-gl.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.784.0.min.js"></script>
+    <script src="https://unpkg.com/@aws-amplify/core@3.7.0/dist/aws-amplify-core.min.js"></script>
+    <script>
+      // use Signer from @aws-amplify/core
+      const { Signer } = window.aws_amplify_core;
+
+      // configuration
+      const identityPoolId = "us-east-1:24d9c3c8-f5a2-4707-b051-234830b8e0f6"; // Cognito Identity Pool ID
+      const mapName = "here-test"; // Amazon Location Service Map Name
+
+      // extract the region from the Identity Pool ID
+      AWS.config.region = identityPoolId.split(":")[0];
+
+      // instantiate a Cognito-backed credential provider
+      const credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: identityPoolId,
+      });
+
+      /**
+       * Sign requests made by MapLibre GL JS using AWS SigV4.
+       */
+      function transformRequest(url, resourceType) {
+        if (resourceType === "Style" && !url.includes("://")) {
+          // resolve to an AWS URL
+          url = `https://maps.geo.${AWS.config.region}.amazonaws.com/maps/v0/maps/${url}/style-descriptor`;
+        }
+
+        if (url.includes("amazonaws.com")) {
+          // only sign AWS requests (with the signature as part of the query string)
+          return {
+            url: Signer.signUrl(url, {
+              access_key: credentials.accessKeyId,
+              secret_key: credentials.secretAccessKey,
+              session_token: credentials.sessionToken,
+            }),
+          };
+        }
+
+        // don't sign
+        return { url };
+      }
+
+      /**
+       * Initialize a map.
+       */
+      async function initializeMap() {
+        // load credentials and set them up to refresh
+        await credentials.getPromise();
+
+        // Initialize the map
+        const map = new maplibregl.Map({
+          container: "map",
+          center: [-123.1187, 49.2819], // initial map centerpoint
+          zoom: 10, // initial map zoom
+          style: mapName,
+          transformRequest,
+        });
+        let marker = new maplibregl.Marker()
+          .setLngLat([-123.1187, 49.2819]).addTo(map);
+
+         new maplibregl.Marker()
+          .setLngLat([-124.1187, 49.2819]).addTo(map);
+
+         new maplibregl.Marker()
+          .setLngLat([-125.1187, 49.2819]).addTo(map);
+
+<!--        let params = {-->
+<!--          IndexName:"placesName",-->
+<!--          Position:[-123.1187, 49.2819],-->
+<!--          Language:"en",-->
+<!--          MaxResults:"5",-->
+<!--        }-->
+<!--        location.searchPlaceIndexForPosition(params,function(err,data){aleat("a")});-->
+        //map.addControl(new maplibregl.NavigationControl(), "top-left");
+      }
+
+      initializeMap();
+    </script>
+  </body>
+</html>
