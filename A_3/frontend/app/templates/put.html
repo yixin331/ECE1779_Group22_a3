@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Put</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/index.css') }}">
+</head>
+<body>
+    <form action="{{url_for('main')}}" method="get">
+        <input type="submit" value="return">
+    </form>
+    <form class="container" action="{{ url_for('put')}}"
+          enctype="multipart/form-data" method=post id="formBox"
+              name="form" >
+<!--        target="hideIframe">-->
+            <table border="1" >
+                <tr>
+                    <td>
+                        <label for="getImage">Image:</label>
+                        <input id="getImage" type="file" name="file"  onchange="showImg(this)" />
+                    </td>
+                </tr>
+                <tr id="imageCell" style="display:none">
+                    <td>
+                        <img id="showimg" src="" style="display:none;" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="getKey">Add description to your image:</label><br>
+                        <input class="biggerText" maxlength="100" type="text" name="key" placeholder=""/>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" name="share" value="share" onclick="hide()"/>
+                        <label id="share" for="mode" >Do you want to share location information?</label><br>
+
+                    </td>
+                </tr>
+                <tr id="beHidden" style="display:none">
+                    <td>
+                        Latitude:<input name="lat" id="lat" type="text"  />
+                        Longitude:<input name="lon" id="lon" type="text"  />
+                        <input type="button" value="get your coordinates" onclick="getLocation()"/></br>
+                        <p>Add a address:</p>
+                        Street Address:</br><input name="street" class="longerText" type="text"></br>
+                        City:</br><input name="city" class="longerText" type="text"></br>
+                        Province:<br>
+                        <select name="province" class="longerText">
+                            <option value="Ontario">Ontario</option>
+                            <option value="Alberta">Alberta</option>
+                            <option value="Yukon">Yukon</option>
+                        </select>
+                    </td>
+                </tr>
+
+
+
+
+
+            </table>
+            <input type=submit value=Upload onclick="return checkImage()">
+        </form>
+{% if result %}
+  <h1>{{ result }}!</h1>
+{% else %}
+  <h1></h1>
+{% endif %}
+
+
+<script>
+var x = document.getElementById("lat");
+var y = document.getElementById("lon");
+
+function getLocation() {
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else {
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+function showPosition(position) {
+  x.value = position.coords.latitude;
+  y.value =  position.coords.longitude;
+}
+</script>
+
+</body>
+
+
+<script type="text/javascript" src="{{ url_for('static',filename='index.js') }}"></script>
+</html>
