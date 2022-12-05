@@ -56,6 +56,7 @@ def create_bucket(bucket_name):
         except ClientError as e:
             webapp.logger.warning("Fail to create a bucket")
 
+
 @webapp.route('/put', methods=['GET', 'POST'])
 def put():
     result = ""
@@ -136,7 +137,7 @@ def put():
                 create_bucket(bucket_name)
                 s3.put_object(Bucket=bucket_name, Key=key, Body=file)
             else:
-                city = ''
+                city = 'default'
             webapp.logger.warning(city)
             dbconnection.put_image(key, key + "." + extension, label, city)
             file.seek(0, 0)

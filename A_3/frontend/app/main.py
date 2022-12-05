@@ -138,9 +138,8 @@ def list_key(key):
         webapp.logger.warning("Manager app loses connection")
     if response is None or response["success"] == "false":
         #  cache miss, get from DB
-        cursor = dbconnection.get_image(key)
-        result = cursor.fetchone()
-        if result is None:
+        result = dbconnection.get_image(key)
+        if result == "":
             # not in both
             value = {"success": "false", "error": {"code": 400, "message": "Key does not exist"}}
             response = webapp.response_class(

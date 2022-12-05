@@ -45,4 +45,4 @@ def library():
             print(urls)
             return render_template("library.html", user_image=urls)
     else:
-        return render_template("library.html")
+        return render_template("library.html",user_image=None)
