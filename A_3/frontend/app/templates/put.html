@@ -5,10 +5,11 @@
     <title>Put</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/index.css') }}">
 </head>
-<body>
+<body style="background:url('../static/images/333333.jpg');
+    background-size:cover;background-repeat: no-repeat;">
 
     <form action="{{url_for('main')}}" method="get">
-        <input type="submit" value="return">
+        <input type="submit" value="return" style="margin-left:40px">
     </form>
     <form class="container" action="{{ url_for('put')}}"
           enctype="multipart/form-data" method=post id="formBox"
@@ -69,7 +70,7 @@
 
 
             </table>
-            <input type=submit value=Upload onclick="return checkImage()">
+            <input type=submit value=Upload onclick="return checkImage()" style="margin-left:40px">
         </form>
 {% if result %}
   <h1>{{ result }}!</h1>

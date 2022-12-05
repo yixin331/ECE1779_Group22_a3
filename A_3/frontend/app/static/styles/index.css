@@ -16,6 +16,10 @@ table{
     height:90%
 }
 
+body{
+   background-color:#FAEBD7;
+}
+
 
 th,td{
     border: 1px solid #999;
@@ -23,12 +27,6 @@ th,td{
     padding: 50px;
 }
 
-body{
-    background:url("222222.jpg");
-    background-size:100% 100%;
-    /*background-color:#deab8a; 222,171,138*/
-
-}
 
 img{
     max-width:250px;max-height:250px;

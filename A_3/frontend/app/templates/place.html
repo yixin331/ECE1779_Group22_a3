@@ -94,11 +94,11 @@
         var long = document.getElementsByClassName("longitude");
         var lati = document.getElementsByClassName("latitude");
         number = cityName.length;
-
+        var web;
         for(i=0;i<number;i++){
           web = "http://localhost:5000/getplace/"+cityName[i].innerHTML;
           new maplibregl.Marker().setLngLat([long[i].innerHTML, lati[i].innerHTML])
-                .setPopup(new maplibregl.Popup().setHTML(`<h1>${cityName[i].innerHTML}</h1></br><a href=${web}>-----------></a>`))// add popup
+                .setPopup(new maplibregl.Popup().setHTML(`<h1>${cityName[i].innerHTML}</h1></br><a href=${web}>Click here to visit</a>`))// add popup
                 .addTo(map);
         }
         map.addControl(new maplibregl.NavigationControl(), "top-left");
