@@ -1,6 +1,6 @@
 import boto3
 from app.config import aws_config
-from app import dbconnection
+from app import webapp
 from boto3.dynamodb.conditions import Key
 from datetime import datetime
 
@@ -16,7 +16,7 @@ def initializeDB():
     try:
         db.delete_table(Table_name='image')
     except db.exceptions.ResourceNotFoundException as err:
-        pass
+        webapp.logger.warning("Table image does not exist")
 
     db.get_waiter('table_not_exists').wait(TableName='image')
 
@@ -164,14 +164,15 @@ def initializeDB():
             }
         )
     except db.exceptions.ResourceInUseException as error:
-        pass
+        webapp.logger.warning("Table image exists")
 
     db.get_waiter('table_exists').wait(TableName='image')
+
 
     try:
         db.delete_table(Table_name='memcache_config')
     except db.exceptions.ResourceNotFoundException as err:
-        pass
+        webapp.logger.warning("Table memcache_config does not exist")
 
     db.get_waiter('table_not_exists').wait(TableName='memcache_config')
 
@@ -223,16 +224,17 @@ def initializeDB():
             }
         )
     except db.exceptions.ResourceInUseException as error:
-        pass
+        webapp.logger.warning("Table memcache_config exists")
 
     db.get_waiter('table_exists').wait(TableName='memcache_config')
 
     put_config(128, 'LRU')
 
+
     try:
         db.delete_table(Table_name='memcache_mode')
     except db.exceptions.ResourceNotFoundException as err:
-        pass
+        webapp.logger.warning("Table memcache_mode does not exist")
 
     db.get_waiter('table_not_exists').wait(TableName='memcache_mode')
 
@@ -300,7 +302,7 @@ def initializeDB():
             }
         )
     except db.exceptions.ResourceInUseException as error:
-        pass
+        webapp.logger.warning("Table memcache_mode exists")
 
     db.get_waiter('table_exists').wait(TableName='memcache_mode')
 
