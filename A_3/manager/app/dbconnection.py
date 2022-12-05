@@ -8,20 +8,20 @@ from datetime import datetime
 def initializeDB():
     db = boto3.client(
         'dynamodb',
-        aws_config['region'],
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
     try:
-        db.delete_table(Table_name='image')
+        db.delete_table(TableName='image')
     except db.exceptions.ResourceNotFoundException as err:
         webapp.logger.warning("Table image does not exist")
 
     db.get_waiter('table_not_exists').wait(TableName='image')
 
     try:
-        table = dynamodb.create_table(
+        table = db.create_table(
             TableName='image',
             KeySchema=[
                 {
@@ -170,19 +170,19 @@ def initializeDB():
 
 
     try:
-        db.delete_table(Table_name='memcache_config')
+        db.delete_table(TableName='memcache_config')
     except db.exceptions.ResourceNotFoundException as err:
         webapp.logger.warning("Table memcache_config does not exist")
 
     db.get_waiter('table_not_exists').wait(TableName='memcache_config')
 
     try:
-        table = dynamodb.create_table(
+        table = db.create_table(
             TableName='memcache_config',
             KeySchema=[
                 {
                     'AttributeName': 'updated_time',
-                    'KeyType': 'RANGE'
+                    'KeyType': 'HASH'
                 }
             ],
             GlobalSecondaryIndexes=[
@@ -190,7 +190,7 @@ def initializeDB():
                     'IndexName': "GetConfigIndex",
                     'KeySchema': [
                         {
-                            'KeyType': 'RANGE',
+                            'KeyType': 'HASH',
                             'AttributeName': 'updated_time'
                         }
                     ],
@@ -207,14 +207,6 @@ def initializeDB():
             AttributeDefinitions=[
                 {
                     'AttributeName': 'updated_time',
-                    'AttributeType': 'S'
-                },
-                {
-                    'AttributeName': 'capacity',
-                    'AttributeType': 'N'
-                },
-                {
-                    'AttributeName': 'policy',
                     'AttributeType': 'S'
                 }
             ],
@@ -232,19 +224,19 @@ def initializeDB():
 
 
     try:
-        db.delete_table(Table_name='memcache_mode')
+        db.delete_table(TableName='memcache_mode')
     except db.exceptions.ResourceNotFoundException as err:
         webapp.logger.warning("Table memcache_mode does not exist")
 
     db.get_waiter('table_not_exists').wait(TableName='memcache_mode')
 
     try:
-        table = dynamodb.create_table(
+        table = db.create_table(
             TableName='memcache_mode',
             KeySchema=[
                 {
                     'AttributeName': 'updated_time',
-                    'KeyType': 'RANGE'
+                    'KeyType': 'HASH'
                 }
             ],
             GlobalSecondaryIndexes=[
@@ -252,7 +244,7 @@ def initializeDB():
                     'IndexName': "GetModeIndex",
                     'KeySchema': [
                         {
-                            'KeyType': 'RANGE',
+                            'KeyType': 'HASH',
                             'AttributeName': 'updated_time'
                         }
                     ],
@@ -270,31 +262,7 @@ def initializeDB():
                 {
                     'AttributeName': 'updated_time',
                     'AttributeType': 'S'
-                },
-                {
-                    'AttributeName': 'num_node',
-                    'AttributeType': 'N'
-                },
-                {
-                    'AttributeName': 'mode',
-                    'AttributeType': 'S'
-                },
-                {
-                    'AttributeName': 'max_thr',
-                    'AttributeType': 'N'
-                },
-                {
-                    'AttributeName': 'min_thr',
-                    'AttributeType': 'N'
-                },
-                {
-                    'AttributeName': 'expand_ratio',
-                    'AttributeType': 'N'
-                },
-                {
-                    'AttributeName': 'shrink_ratio',
-                    'AttributeType': 'N'
-                },
+                }
             ],
             ProvisionedThroughput={
                 'ReadCapacityUnits': 10,
@@ -310,19 +278,19 @@ def initializeDB():
 
 
 def get_image(key):
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
+
+    table = db.Table('image')
 
     response = table.query(
         IndexName='GetImageIndex',
-        KeyConditionExpression=Key('ID').eq(key),
-        ProjectionExpression='path'
+        KeyConditionExpression=Key('ID').eq(key)
     )
 
     if len(response['Items']) == 0:
@@ -332,14 +300,15 @@ def get_image(key):
 
 
 def put_image(key, path, label, city):
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
+
+    table = db.Table('image')
 
     # invalidate key if key exists
     if key_exists(key) == {}:
@@ -368,37 +337,45 @@ def put_image(key, path, label, city):
 
 
 def list_keys():
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
 
-    response = table.query(
-        IndexName='ListKeysIndex'
-    )
-
+    table = db.Table('image')
     records = []
+    scan = table.scan(IndexName='ListKeysIndex')
+    with table.batch_writer() as batch:
+        for each in scan['Items']:
+            if each['ID'] not in records:
+                records.append(each['ID'])
 
-    for i in response['Items']:
-        if i['ID'] not in records:
-            records.append(i['ID'])
+    while 'LastEvaluatedKey' in scan:
+        scan = table.scan(
+            IndexName='ListKeysIndex',
+            ExclusiveStartKey=scan['LastEvaluatedKey']
+        )
 
+        with table.batch_writer() as batch:
+            for each in scan['Items']:
+                if each['ID'] not in records:
+                    records.append(each['ID'])
     return records
 
 
 def key_exists(key):
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
+
+    table = db.Table('image')
 
     response = table.query(
         IndexName='IDEXISTSIndex',
@@ -412,14 +389,15 @@ def key_exists(key):
 
 
 def put_config(capacity, policy):
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='memcache_config')
+    db = session.resource('dynamodb')
+
+    table = db.Table('memcache_config')
 
     response = table.put_item(
         Item={
@@ -431,14 +409,15 @@ def put_config(capacity, policy):
 
 
 def put_mode(num_node, mode, max_thr, min_thr, expand_ratio, shrink_ratio):
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='memcache_mode')
+    db = session.resource('dynamodb')
+
+    table = db.Table('memcache_mode')
 
     response = table.put_item(
         Item={
@@ -454,16 +433,17 @@ def put_mode(num_node, mode, max_thr, min_thr, expand_ratio, shrink_ratio):
 
 
 def clear():
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
 
-    scan = table.scan()
+    table = db.Table('image')
+
+    scan = table.scan(IndexName='ListKeysIndex')
     with table.batch_writer() as batch:
         for each in scan['Items']:
             batch.delete_item(
@@ -472,16 +452,31 @@ def clear():
                 }
             )
 
+    while 'LastEvaluatedKey' in scan:
+        scan = table.scan(
+            IndexName='ListKeysIndex',
+            ExclusiveStartKey=scan['LastEvaluatedKey']
+            )
+
+        with table.batch_writer() as batch:
+            for each in scan['Items']:
+                batch.delete_item(
+                    Key={
+                        'ID': each['ID']
+                    }
+                )
+
 
 def update_image(key):
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
+
+    table = db.Table('image')
     response = table.update_item(
         Key={
             'ID': key
@@ -494,14 +489,15 @@ def update_image(key):
 
 
 def sort_by_time(key_list):
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
+
+    table = db.Table('image')
 
     # ids_to_sort = ', '.join(str(id) for id in key_list)
 
@@ -520,46 +516,63 @@ def sort_by_time(key_list):
 
 
 def list_locations():
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
 
-    response = table.query(
-        IndexName='ListLocationsIndex'
-    )
+    table = db.Table('image')
 
     records = []
+    scan = table.scan(IndexName='ListLocationsIndex')
+    with table.batch_writer() as batch:
+        for each in scan['Items']:
+            if each['location'] != 'default' and each['location'] not in records:
+                records.append(each['location'])
 
-    for i in response['Items']:
-        if i['location'] != '' and i['location'] not in records:
-            records.append(i['location'])
+    while 'LastEvaluatedKey' in scan:
+        scan = table.scan(
+            IndexName='ListLocationsIndex',
+            ExclusiveStartKey=scan['LastEvaluatedKey']
+        )
+
+        with table.batch_writer() as batch:
+            for each in scan['Items']:
+                if each['location'] != 'default' and each['location'] not in records:
+                    records.append(each['location'])
 
     return records
 
 
 def list_tags():
-    db = boto3.client(
-        'dynamodb',
-        aws_config['region'],
+    session = boto3.Session(
+        region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
         aws_secret_access_key=aws_config['secret_access_key']
     )
 
-    table = db.Table(tableName='image')
+    db = session.resource('dynamodb')
 
-    response = table.query(
-        IndexName='ListTagsIndex'
-    )
+    table = db.Table('image')
 
     records = []
+    scan = table.scan(IndexName='ListTagsIndex')
+    with table.batch_writer() as batch:
+        for each in scan['Items']:
+            if each['tag'] != 'default' and each['tag'] not in records:
+                records.append(each['tag'])
 
-    for i in response['Items']:
-        if i['tag'] != '' and i['tag'] not in records:
-            records.append(i['tag'])
+    while 'LastEvaluatedKey' in scan:
+        scan = table.scan(
+            IndexName='ListTagsIndex',
+            ExclusiveStartKey=scan['LastEvaluatedKey']
+        )
 
+        with table.batch_writer() as batch:
+            for each in scan['Items']:
+                if each['tag'] != 'default' and each['tag'] not in records:
+                    records.append(each['tag'])
     return records

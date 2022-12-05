@@ -29,9 +29,8 @@ def get():
         except requests.exceptions.ConnectionError as err:
             webapp.logger.warning("Manager app loses connection")
         if response is None or response["success"] == "false":
-            cursor = dbconnection.get_image(key)
-            result = cursor.fetchone()
-            if result is None:
+            result = dbconnection.get_image(key)
+            if result == "":
                 return render_template("get.html", user_image=None)
             else:
                 s3 = boto3.client(
