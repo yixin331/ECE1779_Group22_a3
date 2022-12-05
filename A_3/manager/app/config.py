@@ -14,3 +14,5 @@ aws_config = {'access_key_id': 'AKIAR23VGBXQCKSR55YL',
               'region': 'us-east-1'}
 
 ami_id = 'ami-0a3ee4380966f8757'
+
+security_group = ['sg-0e46d5cd0794f94c1', 'sg-096e2c53794db12c5']
