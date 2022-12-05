@@ -5,6 +5,9 @@
       href="https://unpkg.com/maplibre-gl@1.14.0/dist/maplibre-gl.css"
       rel="stylesheet"
     />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css' rel='stylesheet' />
     <style>
       body {
         margin: 0;
@@ -19,11 +22,18 @@
   <body>
     <!-- map container -->
     <div id="map" />
+    <div style="display:none">
+      {% for row in dict %}
+      <p class="cityName">{{row}}</p><p class="longitude">{{dict[row][0]}}</p><p class="latitude">{{dict[row][1]}}</p>
+    {% endfor %}
+    </div>
     <!-- JavaScript dependencies -->
     <script src="https://unpkg.com/maplibre-gl@1.14.0/dist/maplibre-gl.js"></script>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.784.0.min.js"></script>
     <script src="https://unpkg.com/@aws-amplify/core@3.7.0/dist/aws-amplify-core.min.js"></script>
+
     <script>
+
       // use Signer from @aws-amplify/core
       const { Signer } = window.aws_amplify_core;
 
@@ -73,28 +83,26 @@
         // Initialize the map
         const map = new maplibregl.Map({
           container: "map",
-          center: [-123.1187, 49.2819], // initial map centerpoint
-          zoom: 10, // initial map zoom
+          center: [-10, 35], // initial map centerpoint
+          zoom: 2, // initial map zoom
           style: mapName,
           transformRequest,
         });
-        let marker = new maplibregl.Marker()
-          .setLngLat([-123.1187, 49.2819]).addTo(map);
 
-         new maplibregl.Marker()
-          .setLngLat([-124.1187, 49.2819]).addTo(map);
 
-         new maplibregl.Marker()
-          .setLngLat([-125.1187, 49.2819]).addTo(map);
+        var cityName = document.getElementsByClassName("cityName");
+        var long = document.getElementsByClassName("longitude");
+        var lati = document.getElementsByClassName("latitude");
+        number = cityName.length;
 
-<!--        let params = {-->
-<!--          IndexName:"placesName",-->
-<!--          Position:[-123.1187, 49.2819],-->
-<!--          Language:"en",-->
-<!--          MaxResults:"5",-->
-<!--        }-->
-<!--        location.searchPlaceIndexForPosition(params,function(err,data){aleat("a")});-->
-        //map.addControl(new maplibregl.NavigationControl(), "top-left");
+        for(i=0;i<number;i++){
+          web = "https://localhost:5000/place?"+cityName[i].innerHTML;
+          new maplibregl.Marker().setLngLat([long[i].innerHTML, lati[i].innerHTML])
+                .setPopup(new maplibregl.Popup().setHTML(`<h1>${cityName[i].innerHTML}</h1></br><a href=${web}>-----------></a>`))// add popup
+                .addTo(map);
+        }
+        map.addControl(new maplibregl.NavigationControl(), "top-left");
+
       }
 
       initializeMap();
