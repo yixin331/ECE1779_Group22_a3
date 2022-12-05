@@ -16,13 +16,6 @@
             <table border="1" >
                 <tr>
                     <td>
-                        <label for="getKey">Key:</label>
-                        <input id="getKey" type="text" name="key" placeholder="" />
-                        {{status}}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
                         <label for="getImage">Image:</label>
                         <input id="getImage" type="file" name="file"  onchange="showImg(this)" />
                     </td>
@@ -32,8 +25,7 @@
                         <img id="showimg" src="" style="display:none;" />
                     </td>
                 </tr>
-                {# new   #}
-                 <tr>
+                <tr>
                     <td>
                         <label for="getKey">Add description to your image:</label><br>
                         <input class="biggerText" maxlength="100" type="text" name="key" placeholder=""/>
@@ -63,7 +55,11 @@
                         </select>
                     </td>
                 </tr>
-            {# new   #}
+
+
+
+
+
             </table>
             <input type=submit value=Upload onclick="return checkImage()">
         </form>
@@ -72,6 +68,7 @@
 {% else %}
   <h1></h1>
 {% endif %}
+
 
 <script>
 var x = document.getElementById("lat");
