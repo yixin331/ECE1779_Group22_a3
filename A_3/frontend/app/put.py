@@ -1,3 +1,4 @@
+import json
 from flask import render_template, url_for, request, g
 from app import webapp, dbconnection, num_n
 import requests
@@ -17,6 +18,43 @@ def teardown_db(exception):
     if db is not None:
         db.close()
 
+
+def create_bucket(bucket_name):
+    s3 = boto3.client(
+        's3',
+        aws_config['region'],
+        aws_access_key_id=aws_config['access_key_id'],
+        aws_secret_access_key=aws_config['secret_access_key']
+    )
+    response = s3.list_buckets()
+    created = False
+    for bucket in response['Buckets']:
+        if bucket["Name"] == bucket_name:
+            created = True
+    if not created:
+        try:
+            response = s3.create_bucket(Bucket=bucket_name)
+            bucket_policy = {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Sid": "PublicRead",
+                        "Effect": "Allow",
+                        "Principal": "*",
+                        "Action": [
+                            "s3:GetObject",
+                            "s3:GetObjectVersion"
+                        ],
+                        "Resource": [
+                            "arn:aws:s3:::" + bucket_name + "/*"
+                        ]
+                    }
+                ]
+            }
+            bucket_policy = json.dumps(bucket_policy)
+            s3.put_bucket_policy(Bucket=bucket_name, Policy=bucket_policy)
+        except ClientError as e:
+            webapp.logger.warning("Fail to create a bucket")
 
 @webapp.route('/put', methods=['GET', 'POST'])
 def put():
@@ -42,20 +80,12 @@ def put():
             aws_access_key_id=aws_config['access_key_id'],
             aws_secret_access_key=aws_config['secret_access_key']
         )
-        response = s3.list_buckets()
         bucket_name = '1779a3files'
-        created = False
-        for bucket in response['Buckets']:
-            if bucket["Name"] == bucket_name:
-                created = True
-        if not created:
-            try:
-                response = s3.create_bucket(Bucket=bucket_name)
-            except ClientError as e:
-                webapp.logger.warning("Fail to create a bucket")
+        create_bucket(bucket_name)
         if file and '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
             extension = filename.rsplit('.', 1)[1].lower()
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)
+            file.seek(0, 0)
             # detect label
             client = boto3.client('rekognition')
             response = client.detect_labels(Image={'S3Object': {'Bucket': bucket_name, 'Name': key}})
@@ -73,29 +103,39 @@ def put():
                     break
             webapp.logger.warning("Label identified " + label)
             # create corresponding bucket & store
+            # make sure the bucket_name is valid
+            bucket_name = '1779' + label.lower()
             s3 = boto3.client(
                 's3',
                 aws_config['region'],
                 aws_access_key_id=aws_config['access_key_id'],
                 aws_secret_access_key=aws_config['secret_access_key']
             )
-            response = s3.list_buckets()
-            # make sure the bucket_name is valid
-            bucket_name = '1779' + label.lower()
-            created = False
-            for bucket in response['Buckets']:
-                if bucket["Name"] == bucket_name:
-                    created = True
-            if not created:
-                try:
-                    response = s3.create_bucket(Bucket=bucket_name)
-                except ClientError as e:
-                    webapp.logger.warning("Fail to create a bucket")
+            create_bucket(bucket_name)
+            # check duplicate keys
+            # webapp.logger.warning(s3.list_objects(Bucket=bucket_name))
+            # for key_info in s3.list_objects(Bucket=bucket_name)['Contents']:
+            #     if str(key_info['Key']).startswith(key + "."):
+            #         s3.delete_object(Bucket=bucket_name, Key=key_info['Key'])
+            #         break
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)
-            # get location : get city
-            # TODO: may need to use location service when needed
+            file.seek(0, 0)
+            # TODO: for invalidate key, need to delete images in bucket if exists
+            # tag = dbconnection.get_tag(key)
+            # s3.delete_object(Bucket= tag, Key=key)
             city = request.form.get('city')
-            if not (location_needed and len(city) > 0):
+            # Store it into location bucket if needed
+            if location_needed and len(city) > 0:
+                s3 = boto3.client(
+                    's3',
+                    aws_config['region'],
+                    aws_access_key_id=aws_config['access_key_id'],
+                    aws_secret_access_key=aws_config['secret_access_key']
+                )
+                bucket_name = 'location' + city.lower()
+                create_bucket(bucket_name)
+                s3.put_object(Bucket=bucket_name, Key=key, Body=file)
+            else:
                 city = ''
             webapp.logger.warning(city)
             dbconnection.put_image(key, key + "." + extension, label, city)
