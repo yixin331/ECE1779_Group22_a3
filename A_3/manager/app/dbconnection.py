@@ -1,7 +1,7 @@
 import boto3
 from app.config import aws_config
 from app import webapp
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 from datetime import datetime
 
 
@@ -39,7 +39,7 @@ def initializeDB():
                         },
                         {
                             'KeyType': 'RANGE',
-                            'AttributeName': 'path'
+                            'AttributeName': 'image_path'
                         }
                     ],
                     'Projection': {
@@ -87,11 +87,11 @@ def initializeDB():
                     }
                 },
                 {
-                    'IndexName': "ListLocationsIndex",
+                    'IndexName': "ListCitiesIndex",
                     'KeySchema': [
                         {
                             'KeyType': 'HASH',
-                            'AttributeName': 'location'
+                            'AttributeName': 'city'
                         }
                     ],
                     'Projection': {
@@ -142,11 +142,11 @@ def initializeDB():
                     'AttributeType': 'S'
                 },
                 {
-                    'AttributeName': 'path',
+                    'AttributeName': 'image_path',
                     'AttributeType': 'S'
                 },
                 {
-                    'AttributeName': 'location',
+                    'AttributeName': 'city',
                     'AttributeType': 'S'
                 },
                 {
@@ -296,7 +296,7 @@ def get_image(key):
     if len(response['Items']) == 0:
         return ""
 
-    return response['Items'][0]['path']
+    return response['Items'][0]['image_path']
 
 
 def put_image(key, path, label, city):
@@ -315,8 +315,8 @@ def put_image(key, path, label, city):
         response = table.put_item(
             Item={
                 'ID': key,
-                'path': path,
-                'location': city,
+                'image_path': path,
+                'city': city,
                 'tag': label,
                 'last_edited_time': datetime.now().isoformat()
             }
@@ -326,7 +326,7 @@ def put_image(key, path, label, city):
             Key={
                 'ID': key
             },
-            UpdateExpression="set path=:p, location=:c, tag=:l, last_edited_time =:t",
+            UpdateExpression="set image_path=:p, city=:c, tag=:l, last_edited_time =:t",
             ExpressionAttributeValues={
                 ':p': path,
                 ':c': city,
@@ -363,6 +363,7 @@ def list_keys():
             for each in scan['Items']:
                 if each['ID'] not in records:
                     records.append(each['ID'])
+    records.sort()
     return records
 
 
@@ -500,22 +501,33 @@ def sort_by_time(key_list):
     table = db.Table('image')
 
     # ids_to_sort = ', '.join(str(id) for id in key_list)
-
-    response = table.query(
-        IndexName='SortIDIndex',
-        FilterExpression=Attr('ID').is_in(key_list),
-        ScanIndexForward=true
-    )
     records = []
+    scan = table.scan(
+        IndexName='SortIDIndex',
+        FilterExpression=Attr('ID').is_in(key_list)
+    )
+    with table.batch_writer() as batch:
+        for each in scan['Items']:
+            if each['ID'] not in records:
+                records.append(each['ID'])
 
-    for i in response['Items']:
-        if i['ID'] not in records:
-            records.append(i['ID'])
+    while 'LastEvaluatedKey' in scan:
+        scan = table.scan(
+            IndexName='SortIDIndex',
+            FilterExpression=Attr('ID').is_in(key_list),
+            ExclusiveStartKey=scan['LastEvaluatedKey']
+        )
 
+        with table.batch_writer() as batch:
+            for each in scan['Items']:
+                if each['ID'] not in records:
+                    records.append(each['ID'])
+    records.reverse()
+    webapp.logger.warning(records)
     return records
 
 
-def list_locations():
+def list_cities():
     session = boto3.Session(
         region_name=aws_config['region'],
         aws_access_key_id=aws_config['access_key_id'],
@@ -527,23 +539,24 @@ def list_locations():
     table = db.Table('image')
 
     records = []
-    scan = table.scan(IndexName='ListLocationsIndex')
+    scan = table.scan(IndexName='ListCitiesIndex')
     with table.batch_writer() as batch:
         for each in scan['Items']:
-            if each['location'] != 'default' and each['location'] not in records:
-                records.append(each['location'])
+            if each['city'] != 'default' and each['city'] not in records:
+                records.append(each['city'])
 
     while 'LastEvaluatedKey' in scan:
         scan = table.scan(
-            IndexName='ListLocationsIndex',
+            IndexName='ListCitiesIndex',
             ExclusiveStartKey=scan['LastEvaluatedKey']
         )
 
         with table.batch_writer() as batch:
             for each in scan['Items']:
-                if each['location'] != 'default' and each['location'] not in records:
-                    records.append(each['location'])
-
+                if each['city'] != 'default' and each['city'] not in records:
+                    records.append(each['city'])
+    records.sort()
+    webapp.logger.warning(records)
     return records
 
 
@@ -575,4 +588,6 @@ def list_tags():
             for each in scan['Items']:
                 if each['tag'] != 'default' and each['tag'] not in records:
                     records.append(each['tag'])
+    records.sort()
+    webapp.logger.warning(records)
     return records
