@@ -1,21 +1,33 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
 
 table{
-    width: 100%;
+    margin-left:auto;
+    margin-right:auto;
+    width: 95%;
     border-collapse: collapse;
-    background-color:#fedcbd;
-}
+    background-color:rgba(254,220,189,0.9);
 
+}
+.indexHead{
+    margin: auto;
+
+    /*background-color:rgba(222,171,138,0.9);*/
+    width:70%;
+    height:90%
+}
 
 
 th,td{
     border: 1px solid #999;
-    text-align: left;
+    text-align: center;
     padding: 50px;
 }
 
 body{
-    background-color:#deab8a;
+    background:url("222222.jpg");
+    background-size:100% 100%;
+    /*background-color:#deab8a; 222,171,138*/
+
 }
 
 img{
