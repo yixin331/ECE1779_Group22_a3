@@ -21,7 +21,7 @@ memcache_mode = {'num_node': 1, 'mode': 'Manual', 'max_thr': 1, 'min_thr': 0, 'e
 memcache_config = {'capacity': 128, 'policy': 'LRU'}
 node_ip = {}
 memcache_stat = {}
-memcache_stat['NumNode']=[]
+memcache_stat['NumNode'] = []
 memcache_stat['Time'] = []
 memcache_stat['NumItem'] = []
 memcache_stat['TotalSize'] = []
@@ -42,7 +42,33 @@ from app import remap
 from app import sizeChange
 
 
-# TODO: need to call this when creating a new memcache instance
+# call this when running first time
+@webapp.route('/ec2_create', methods=['POST'])
+def create_instances():
+    ec2_client = boto3.client(
+        'ec2',
+        region_name=aws_config['region'],
+        aws_access_key_id=aws_config['access_key_id'],
+        aws_secret_access_key=aws_config['secret_access_key']
+    )
+    USERDATA_SCRIPT = '''#!/bin/bash
+    cd /home/ubuntu/ECE1779_Group22_a2/A_2/memcache
+    pip install flask
+    pip install apscheduler
+    pip install boto3
+    python3 run.py'''
+    instances = ec2_client.run_instances(ImageId=config.ami_id, MinCount=1, MaxCount=8,
+                                         InstanceType='t2.micro',
+                                         SecurityGroupIds=config.security_group,
+                                         UserData=USERDATA_SCRIPT)
+    value = {"success": "true"}
+    response = webapp.response_class(
+        response=json.dumps(value),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
 def schedule_cloud_watch(ip, id):
     try:
         node_address = 'http://' + str(ip) + ':5001/putStat'
@@ -66,8 +92,6 @@ def monitor_stats():
     else:
         memcache_stat['NumNode'].pop(0)
         memcache_stat['NumNode'].append(memcache_mode['num_node'])
-
-
 
     for metric in metric_names:
 
@@ -134,6 +158,8 @@ def initialize_instance():
         Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
     response = None
     for instance in instances:
+        if instance.image_id != config.ami_id:
+            continue
         node_ip[instance.instance_id] = None
         webapp.logger.warning(instance.public_ip_address)
         # clear cache stats and set default config
@@ -148,6 +174,7 @@ def initialize_instance():
             response = requests.post(url=node_address, data=keyToSend).json()
         except requests.exceptions.ConnectionError as err:
             webapp.logger.warning("Cache loses connection")
+    webapp.logger.warning(len(node_ip.keys()))
     id = list(node_ip.keys())[0]
     instance = ec2.Instance(id)
     public_ip = instance.public_ip_address
@@ -159,6 +186,5 @@ def initialize_instance():
         webapp.logger.warning("Autoscaler loses connection")
     schedule_cloud_watch(public_ip, id)
     scheduler.add_job(id='monitor_stats', func=monitor_stats, trigger='interval', seconds=60)
-
 
 initialize_instance()
