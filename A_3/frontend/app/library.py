@@ -43,6 +43,9 @@ def library():
                 url = prefix + key['Key']
                 urls[url] = key['Key']
             print(urls)
-            return render_template("library.html", user_image=urls)
+            if len(url) > 0:
+                return render_template("library.html", user_image=urls)
+            else:
+                return render_template("library.html", result="Please input a valid tag", user_image=None)
     else:
-        return render_template("library.html",user_image=None)
+        return render_template("library.html", user_image=None)
