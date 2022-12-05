@@ -14,6 +14,10 @@ from app import deleteAll
 from app import sizeChange
 from app import library
 from app import place
+from app import dbconnection
+
+
+dbconnection.initializeDB()
 
 
 

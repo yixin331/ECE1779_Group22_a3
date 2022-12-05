@@ -96,7 +96,7 @@
         number = cityName.length;
 
         for(i=0;i<number;i++){
-          web = "https://localhost:5000/place?"+cityName[i].innerHTML;
+          web = "http://localhost:5000/getplace/"+cityName[i].innerHTML;
           new maplibregl.Marker().setLngLat([long[i].innerHTML, lati[i].innerHTML])
                 .setPopup(new maplibregl.Popup().setHTML(`<h1>${cityName[i].innerHTML}</h1></br><a href=${web}>-----------></a>`))// add popup
                 .addTo(map);

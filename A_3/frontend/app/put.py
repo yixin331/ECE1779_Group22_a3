@@ -56,6 +56,7 @@ def create_bucket(bucket_name):
         except ClientError as e:
             webapp.logger.warning("Fail to create a bucket")
 
+
 @webapp.route('/put', methods=['GET', 'POST'])
 def put():
     result = ""
@@ -112,12 +113,6 @@ def put():
                 aws_secret_access_key=aws_config['secret_access_key']
             )
             create_bucket(bucket_name)
-            # check duplicate keys
-            # webapp.logger.warning(s3.list_objects(Bucket=bucket_name))
-            # for key_info in s3.list_objects(Bucket=bucket_name)['Contents']:
-            #     if str(key_info['Key']).startswith(key + "."):
-            #         s3.delete_object(Bucket=bucket_name, Key=key_info['Key'])
-            #         break
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)
             file.seek(0, 0)
             # TODO: for invalidate key, need to delete images in bucket if exists
@@ -136,7 +131,7 @@ def put():
                 create_bucket(bucket_name)
                 s3.put_object(Bucket=bucket_name, Key=key, Body=file)
             else:
-                city = ''
+                city = 'default'
             webapp.logger.warning(city)
             dbconnection.put_image(key, key + "." + extension, label, city)
             file.seek(0, 0)
