@@ -88,10 +88,10 @@ def put():
             image_dict = dbconnection.key_exists(key)
             if image_dict != {}:
                 tag = '1779' + image_dict['tag']
-                s3.delete_object(Bucket=tag, Key=image_dict['path'])
+                s3.delete_object(Bucket=tag, Key=image_dict['image_path'])
                 if image_dict['city'] != 'default':
                     location = 'location' + image_dict['city']
-                    s3.delete_object(Bucket=location, Key=image_dict['path'])
+                    s3.delete_object(Bucket=location, Key=image_dict['image_path'])
 
             extension = filename.rsplit('.', 1)[1].lower()
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)

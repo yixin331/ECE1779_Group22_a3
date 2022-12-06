@@ -83,7 +83,7 @@ def shareLocations(location):
     email = request.form.get('email')
     webapp.logger.warning(email)
 
-    bucket_name = '1779' + location.lower()
+    bucket_name = 'location' + location.lower()
     webapp.logger.warning(bucket_name)
     s3 = boto3.client(
         's3',
