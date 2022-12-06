@@ -27,7 +27,7 @@
 </table>
     <table  border="1" >
         {% if user_image %}
-            {% for pair in user_image.items()|batch(4) %}
+            {% for pair in user_image.items()|batch(3) %}
             <tr>
             {% for f,k in pair %}
                 <td>
@@ -41,6 +41,10 @@
             {% endfor %}
         {% endif %}
     </table>
+
+    {% if wordcloud %}
+    <p style="text-align:center;"><img height="1000" width="400" src="data:image/png;base64,{{wordcloud}}"/></p>
+    {% endif %}
 
     {% if result %}
     <h1>{{ result }}!</h1>

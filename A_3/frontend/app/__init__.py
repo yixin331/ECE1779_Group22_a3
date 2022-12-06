@@ -17,7 +17,7 @@ from app import place
 from app import dbconnection
 
 
-#dbconnection.initializeDB()
+# dbconnection.initializeDB()
 
 
 

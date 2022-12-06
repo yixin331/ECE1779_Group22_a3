@@ -133,7 +133,7 @@ def put():
             else:
                 city = 'default'
             webapp.logger.warning(city)
-            dbconnection.put_image(key, key + "." + extension, label, city)
+            dbconnection.put_image(key, key + "." + extension, label.lower(), city.lower())
             file.seek(0, 0)
             # put in cache
             keyToSend = {'key': key}

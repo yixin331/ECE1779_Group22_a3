@@ -1,11 +1,7 @@
 from flask import render_template, url_for, request, g
-from app import webapp, dbconnection, num_n
+from app import webapp, dbconnection
 import requests
-from werkzeug.utils import secure_filename
-from os.path import join, dirname, realpath
-from pathlib import Path
 import os
-import base64
 import boto3
 import json
 import urllib.parse
@@ -15,7 +11,8 @@ from app.config import aws_config
 
 @webapp.route('/place', methods=['GET', 'POST'])
 def place():
-    cities = ['Toronto', "Collingwood", "Beijing", "Shanghai", "Vancouver", "Ottawa", "Chihuahua", "Denver"]
+    cities = dbconnection.list_cities()
+
     client = boto3.client('lambda',
                           region_name='us-east-1',
                           aws_access_key_id='AKIAR23VGBXQKQ2JU4ZI',
@@ -23,7 +20,7 @@ def place():
     city_dict = {}
     for city in cities:
         payload = {
-            "address": city
+            "address": city.capitalize()
         }
         result = client.invoke(FunctionName="location-geocode",
                                InvocationType='RequestResponse',
@@ -32,7 +29,7 @@ def place():
         api_response = json.loads(ranges)
         response_body = api_response['body']
         response = json.loads(response_body)
-        city_dict[city] = response["Results"][0]["Place"]["Geometry"]["Point"]
+        city_dict[city.capitalize()] = response["Results"][0]["Place"]["Geometry"]["Point"]
 
     return render_template("place.html", dict=city_dict)
 

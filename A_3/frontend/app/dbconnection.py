@@ -168,7 +168,6 @@ def initializeDB():
 
     db.get_waiter('table_exists').wait(TableName='image')
 
-
     try:
         db.delete_table(TableName='memcache_config')
     except db.exceptions.ResourceNotFoundException as err:
@@ -221,7 +220,6 @@ def initializeDB():
     db.get_waiter('table_exists').wait(TableName='memcache_config')
 
     put_config(128, 'LRU')
-
 
     try:
         db.delete_table(TableName='memcache_mode')
@@ -457,7 +455,7 @@ def clear():
         scan = table.scan(
             IndexName='ListKeysIndex',
             ExclusiveStartKey=scan['LastEvaluatedKey']
-            )
+        )
 
         with table.batch_writer() as batch:
             for each in scan['Items']:
@@ -571,12 +569,15 @@ def list_tags():
 
     table = db.Table('image')
 
-    records = []
+    records = {}
     scan = table.scan(IndexName='ListTagsIndex')
     with table.batch_writer() as batch:
         for each in scan['Items']:
-            if each['tag'] != 'default' and each['tag'] not in records:
-                records.append(each['tag'])
+            if each['tag'] != 'default':
+                if each['tag'] not in records:
+                    records[each['tag']] = 1
+                else:
+                    records[each['tag']] += 1
 
     while 'LastEvaluatedKey' in scan:
         scan = table.scan(
@@ -586,8 +587,11 @@ def list_tags():
 
         with table.batch_writer() as batch:
             for each in scan['Items']:
-                if each['tag'] != 'default' and each['tag'] not in records:
-                    records.append(each['tag'])
-    records.sort()
+                if each['tag'] != 'default':
+                    if each['tag'] not in records:
+                        records[each['tag']] = 1
+                    else:
+                        records[each['tag']] += 1
+
     webapp.logger.warning(records)
     return records

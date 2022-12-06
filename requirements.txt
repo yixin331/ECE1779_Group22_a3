@@ -3,3 +3,4 @@ flask
 datetime
 timedelta
 boto3
+wordcloud
