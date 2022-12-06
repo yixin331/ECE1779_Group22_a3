@@ -14,7 +14,7 @@ from email.mime.text import MIMEText
 
 
 @webapp.route('/shareTags/<tag>', methods=['GET', 'POST'])
-def share(tag):
+def shareTags(tag):
     ses_client = boto3.client("ses", region_name=aws_config['region'])
     # TODO: add check whether email is ""
     email = request.form.get('email')
@@ -77,7 +77,7 @@ def share(tag):
 
 
 @webapp.route('/shareLocations/<location>', methods=['GET', 'POST'])
-def share(location):
+def shareLocations(location):
     ses_client = boto3.client("ses", region_name=aws_config['region'])
     # TODO: add check whether email is ""
     email = request.form.get('email')
