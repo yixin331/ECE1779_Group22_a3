@@ -50,7 +50,7 @@ def getplace(place):
         url = prefix + key['Key']
         urls[url] = key['Key']
         webapp.logger.warning(len(urls))
-    if len(url) > 0:
+    if len(urls) > 0:
         return render_template("location.html", user_image=urls, place=place)
     else:
         return render_template("location.html", result="There's no photo for " + place, place=place)
