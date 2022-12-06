@@ -84,6 +84,15 @@ def put():
         bucket_name = '1779a3files'
         create_bucket(bucket_name)
         if file and '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
+            # TODO: for invalidate key, need to delete images in bucket if exists
+            image_dict = dbconnection.key_exists(key)
+            if image_dict != {}:
+                tag = '1779' + image_dict['tag']
+                s3.delete_object(Bucket=tag, Key=key)
+                if image_dict['city'] != 'default':
+                    location = 'location' + image_dict['city']
+                    s3.delete_object(Bucket=location, Key=key)
+
             extension = filename.rsplit('.', 1)[1].lower()
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)
             file.seek(0, 0)
@@ -115,9 +124,7 @@ def put():
             create_bucket(bucket_name)
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)
             file.seek(0, 0)
-            # TODO: for invalidate key, need to delete images in bucket if exists
-            # tag = dbconnection.get_tag(key)
-            # s3.delete_object(Bucket= tag, Key=key)
+
             city = request.form.get('city')
             # Store it into location bucket if needed
             if location_needed and len(city) > 0:
