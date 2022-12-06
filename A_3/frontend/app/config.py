@@ -11,3 +11,5 @@
 aws_config = {'access_key_id': 'AKIAR23VGBXQCKSR55YL',
               'secret_access_key': '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',
               'region': 'us-east-1'}
+
+email_config = "albumshare1779@gmail.com"

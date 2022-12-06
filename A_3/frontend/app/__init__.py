@@ -15,6 +15,7 @@ from app import sizeChange
 from app import library
 from app import place
 from app import dbconnection
+from app import share
 
 
 # dbconnection.initializeDB()

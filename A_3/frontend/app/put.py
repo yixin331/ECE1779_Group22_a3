@@ -84,14 +84,14 @@ def put():
         bucket_name = '1779a3files'
         create_bucket(bucket_name)
         if file and '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
-            # TODO: for invalidate key, need to delete images in bucket if exists
+            # For invalidate key, need to delete images in bucket if exists
             image_dict = dbconnection.key_exists(key)
             if image_dict != {}:
                 tag = '1779' + image_dict['tag']
-                s3.delete_object(Bucket=tag, Key=key)
+                s3.delete_object(Bucket=tag, Key=image_dict['path'])
                 if image_dict['city'] != 'default':
                     location = 'location' + image_dict['city']
-                    s3.delete_object(Bucket=location, Key=key)
+                    s3.delete_object(Bucket=location, Key=image_dict['path'])
 
             extension = filename.rsplit('.', 1)[1].lower()
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)
@@ -122,7 +122,7 @@ def put():
                 aws_secret_access_key=aws_config['secret_access_key']
             )
             create_bucket(bucket_name)
-            s3.put_object(Bucket=bucket_name, Key=key, Body=file)
+            s3.put_object(Bucket=bucket_name, Key=key+'.'+extension, Body=file)
             file.seek(0, 0)
 
             city = request.form.get('city')
@@ -136,7 +136,7 @@ def put():
                 )
                 bucket_name = 'location' + city.lower()
                 create_bucket(bucket_name)
-                s3.put_object(Bucket=bucket_name, Key=key, Body=file)
+                s3.put_object(Bucket=bucket_name, Key=key+'.'+extension, Body=file)
             else:
                 city = 'default'
             webapp.logger.warning(city)

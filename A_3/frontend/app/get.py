@@ -19,7 +19,13 @@ def teardown_db(exception):
 @webapp.route('/get', methods=['GET', 'POST'])
 def get():
     if request.method == 'POST':
+        if 'key' not in request.form:
+            return render_template("get.html", result="Please input a valid key")
         key = request.form.get('key')
+        # key invalid
+        if not (key is not None and len(key) > 0):
+            return render_template("get.html", result="Please input a valid key")
+
         result = ""
         # find value in cache
         keyToSend = {'key': key}
