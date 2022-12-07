@@ -84,3 +84,14 @@ img{
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.shareButton{
+    position: absolute;
+    top: 11px;
+    right: 43px;
+    /*padding: 30px;*/
+    /*display:block;*/
+    /*background-color: lightgrey;*/
+    /*color: black;*/
+    /*text-align:center;*/
+}

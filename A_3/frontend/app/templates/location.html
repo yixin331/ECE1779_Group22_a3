@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>Get</title>
@@ -13,6 +14,12 @@
     <form action="{{url_for('main')}}" method="get">
         <input type="submit" value="return" style="margin-left:40px">
     </form>
+    {% if user_image %}
+      <form action="{{url_for('share')}}" method="post" enctype=multipart/form-data id="share">
+        <input type="submit" value="share" class="shareButton">
+        <input type="hidden" id="location" name="location" value={{ place }}>
+      </form>
+    {% endif %}
 
     <h1>Photos for {{ place }}</h1>
 
@@ -40,5 +47,6 @@
     {% endif %}
 
 </body>
+
 
 </html>

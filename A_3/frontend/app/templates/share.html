@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Share</title>
+    <!-- change it to the css file it wants!-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/index.css') }}">
+
+</head>
+<script type="text/javascript" src="{{ url_for('static',filename='index.js') }}"></script>
+
+<body>
+    <form action="{{url_for('main')}}" method="get">
+        <input type="submit" value="return" style="margin-left:40px">
+    </form>
+
+
+<table>
+
+     <tr>
+     <td>
+         <form action="{{ url_for('verifyEmail')}}" method=post enctype=multipart/form-data >
+              <h1>Verify your email address</h1></br>
+              <h4> We need to verify your email for the service</h4></br>
+              <label for="email">Email:</label>
+              {% if email %}
+              <input id="email" type="text" name="email" value={{ email }}> </br>
+              {% else %}
+                  <input id="email" type="text" name="email"/>
+              {% endif %}
+              <input  type="hidden" id="tag" name="tag" value= {{ tag }}>
+              <input  type="hidden" id="location" name="location" value= {{ location }}>
+              <p>
+              <input type="submit" value="verify">
+              <p>
+     </form>
+     </td>
+     </tr>
+
+
+</table>
+
+    {% if result %}
+    <h1>{{ result }}</h1>
+    {% else %}
+    <h1></h1>
+    {% endif %}
+
+
+
+</body>
+
+
+</html>

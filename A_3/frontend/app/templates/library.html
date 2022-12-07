@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>Get</title>
@@ -13,7 +14,14 @@
     <form action="{{url_for('main')}}" method="get">
         <input type="submit" value="return" style="margin-left:40px">
     </form>
-<form action="{{ url_for('library')}}" method=post enctype=multipart/form-data >
+    {% if user_image %}
+      <form action="{{url_for('share')}}" method="post" enctype=multipart/form-data id="share">
+        <input type="submit" value="share" class="shareButton">
+        <input type="hidden" id="tag" name="tag" value={{ tag }}>
+      </form>
+    {% endif %}
+
+<form action="{{ url_for('library')}}" method=post enctype=multipart/form-data>
 <table>
      <tr>
           <td>
@@ -25,6 +33,7 @@
           </td>
         </tr>
 </table>
+
     <table  border="1" >
         {% if user_image %}
             {% for pair in user_image.items()|batch(3) %}
@@ -52,8 +61,8 @@
     <h1></h1>
     {% endif %}
 
-
 </form>
+
 </body>
 
 </html>
