@@ -126,6 +126,7 @@ def put():
             file.seek(0, 0)
 
             city = request.form.get('city')
+            # TODO: if city is empty, get current city using coordinates
             # Store it into location bucket if needed
             if location_needed and len(city) > 0:
                 s3 = boto3.client(
