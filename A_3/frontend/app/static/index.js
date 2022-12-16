@@ -76,8 +76,7 @@ function hide(){
     else{
         beHidden.style.display="none"
     }
-
-
-
-
 }
+
+
+
