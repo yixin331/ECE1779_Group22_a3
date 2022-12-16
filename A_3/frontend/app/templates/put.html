@@ -34,13 +34,13 @@
                         <img id="showimg" src="" style="display:none;" />
                     </td>
                 </tr>
-                <tr>
-                    <td>
-                        <label for="getKey">Add description to your image:</label><br>
-                        <input class="biggerText" maxlength="100" type="text" name="key" placeholder=""/>
+<!--                <tr>-->
+<!--                    <td>-->
+<!--                        <label for="getKey">Add description to your image:</label><br>-->
+<!--                        <input class="biggerText" maxlength="100" type="text" name="key" placeholder=""/>-->
 
-                    </td>
-                </tr>
+<!--                    </td>-->
+<!--                </tr>-->
                 <tr>
                     <td>
                         <input type="checkbox" name="share" value="share" onclick="hide()"/>
@@ -50,12 +50,13 @@
                 </tr>
                 <tr id="beHidden" style="display:none">
                     <td>
-                        Latitude:<input name="lat" id="lat" type="text"  />
-                        Longitude:<input name="lon" id="lon" type="text"  />
-                        <input type="button" value="get your coordinates" onclick="getLocation()"/></br>
+<!--                        Latitude:<input name="lat" id="lat" type="text"  />-->
+<!--                        Longitude:<input name="lon" id="lon" type="text"  />-->
+<!--                        <input type="button" value="get your coordinates" onclick="getLocation()"/></br>-->
                         <p>Add a address:</p>
-                        Street Address:</br><input name="street" class="longerText" type="text"></br>
-                        City:</br><input name="city" class="longerText" type="text"></br>
+<!--                        Street Address:</br><input name="street" class="longerText" type="text"></br>-->
+                        City:</br><input name="city" id="city" class="longerText" type="text"></br>
+                        <input type="button" value="get your coordinates" onclick="getLocation()"/></br>
 
                     </td>
                 </tr>
@@ -74,23 +75,58 @@
 {% endif %}
 
 
-<script>
-var x = document.getElementById("lat");
-var y = document.getElementById("lon");
 
-function getLocation() {
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.1277.0.min.js"></script>
+<script>
+'use strict'
+<!--var x = document.getElementById("lat");-->
+<!--var y = document.getElementById("lon");-->
+var x = document.getElementById("city");
+
+var creds = new AWS.Credentials({
+  accessKeyId: 'AKIAR23VGBXQCKSR55YL', secretAccessKey: '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'
+});
+var myConfig = new AWS.Config({
+  credentials: creds, region: 'us-east-1'
+});
+AWS.config.update(myConfig);
+var lambda = new AWS.Lambda();
+
+const getLocation = async () => {
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition);
   } else {
     x.innerHTML = "Geolocation is not supported by this browser.";
   }
+};
+
+async function showPosition(position)  {
+    var lat = position.coords.latitude;
+    var lon = position.coords.longitude;
+
+    const payload = {
+        long: lon,
+        lat: lat
+    };
+
+    var params = {
+        FunctionName: 'location-reverse-geocode',
+        InvocationType: 'RequestResponse',
+        Payload: JSON.stringify(payload)
+    };
+
+    try {
+        const data = await lambda.invoke(params).promise();
+        console.log('Data2: ', JSON.parse(JSON.parse(data['Payload'])['body']));
+        x.value = JSON.parse(JSON.parse(data['Payload'])['body'])['Results'][0]['Place']['Municipality'];
+    } catch (error) {
+
+        console.log("Error", error);
+        x.value = "";
+    }
 }
 
-function showPosition(position) {
-  x.value = position.coords.latitude;
-  y.value =  position.coords.longitude;
-}
 </script>
 
 </body>
