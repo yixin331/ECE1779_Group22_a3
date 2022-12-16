@@ -42,12 +42,20 @@
         </tr>
     </table>
     {% if result %}
-  <h1>{{ result }}!</h1>
+    <table>
+        <tr><td>
+  <h1 style="margin-left:40px;">{{ result }}!</h1>
+        </td></tr>
+    </table>
 {% else %}
   <h1></h1>
 {% endif %}
     {% if user_image==None and method!='get' %}
-    <h1>Unknown key!</h1>
+     <table>
+        <tr style="padding: 25px; "><td style="padding: 25px; ">
+    <h1 >Unknown key!</h1>
+        </td></tr>
+    </table>
     {% else %}
     <h1></h1>
     {% endif %}
