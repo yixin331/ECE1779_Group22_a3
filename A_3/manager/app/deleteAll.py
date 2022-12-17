@@ -23,7 +23,7 @@ def deleteAll():
                     webapp.logger.warning("Cache loses connection")
         # clear S3
         try:
-            response = requests.post(url='http://localhost:5000/deleteAll').json()
+            response = requests.post(url='https://8w72lx29zc.execute-api.us-east-1.amazonaws.com/dev/deleteAll').json()
         except requests.exceptions.ConnectionError as err:
             webapp.logger.warning("Frontend loses connection")
         result = "Your cache, database and local file system have been cleared"

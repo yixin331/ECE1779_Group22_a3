@@ -23,7 +23,7 @@ def refreshMode():
         if mode == 'Manual':
             # pause scheduler
             try:
-                requests.post(url='http://localhost:5003/setMode', data=request.form)
+                requests.post(url='https://lxu5yc1ifh.execute-api.us-east-1.amazonaws.com/dev/setMode', data=request.form)
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Autoscaler loses connection")
 
@@ -31,7 +31,7 @@ def refreshMode():
             if not num_node == memcache_mode['num_node']:
                 try:
                     numToSend = {'num_node': num_node}
-                    requests.post(url='http://localhost:5000/sizeChange', data=numToSend)
+                    requests.post(url='https://8w72lx29zc.execute-api.us-east-1.amazonaws.com/dev/sizeChange', data=numToSend)
                 except requests.exceptions.ConnectionError as err:
                     webapp.logger.warning("Frontend loses connection")
             else:
@@ -44,7 +44,7 @@ def refreshMode():
             memcache_mode['shrink_ratio'] = float(request.form.get('shrink_ratio'))
             try:
                 dataToSend = {'num_node': memcache_mode['num_node'], 'mode': request.form['mode'], 'max_thr': request.form['max_thr'], 'min_thr': request.form['min_thr'], 'expand_ratio': request.form['expand_ratio'], 'shrink_ratio': request.form['shrink_ratio']}
-                requests.post(url='http://localhost:5003/setMode', data=dataToSend)
+                requests.post(url='https://lxu5yc1ifh.execute-api.us-east-1.amazonaws.com/dev/setMode', data=dataToSend)
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Autoscaler loses connection")
 
