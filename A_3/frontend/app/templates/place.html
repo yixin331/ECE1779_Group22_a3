@@ -96,7 +96,7 @@
         number = cityName.length;
         var web;
         for(i=0;i<number;i++){
-          web = "http://localhost:5000/getplace/"+cityName[i].innerHTML;
+          web = "https://8w72lx29zc.execute-api.us-east-1.amazonaws.com/dev/getplace/"+cityName[i].innerHTML;
           new maplibregl.Marker().setLngLat([long[i].innerHTML, lati[i].innerHTML])
                 .setPopup(new maplibregl.Popup().setHTML(`<h1>${cityName[i].innerHTML}</h1></br><a href=${web}>Click here to visit</a>`))// add popup
                 .addTo(map);

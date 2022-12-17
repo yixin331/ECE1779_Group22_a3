@@ -6,3 +6,4 @@ boto3
 wordcloud
 opencv-python
 requests
+werkzeug

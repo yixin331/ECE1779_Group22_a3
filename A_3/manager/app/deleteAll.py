@@ -1,4 +1,4 @@
-from flask import render_template,redirect, url_for, request, g
+from flask import render_template, redirect, url_for, request, g
 from app import webapp, config, node_ip, dbconnection
 import requests
 
@@ -10,7 +10,7 @@ def teardown_db(exception):
         db.close()
 
 
-@webapp.route('/deleteAll', methods=['GET','POST'])
+@webapp.route('/deleteAll', methods=['GET', 'POST'])
 def deleteAll():
     if request.method == 'POST':
         # clear cache
@@ -21,14 +21,14 @@ def deleteAll():
                     response = requests.post(url=node_address).json()
                 except requests.exceptions.ConnectionError as err:
                     webapp.logger.warning("Cache loses connection")
-        #clear RDS
-        dbconnection.clear()
         # clear S3
         try:
-            response = requests.post(url='http://localhost:5000/deleteAll').json()
+            response = requests.post(url='https://8w72lx29zc.execute-api.us-east-1.amazonaws.com/dev/deleteAll').json()
         except requests.exceptions.ConnectionError as err:
             webapp.logger.warning("Frontend loses connection")
         result = "Your cache, database and local file system have been cleared"
-        return render_template("deleteAll.html",result=result)
+        # clear RDS
+        dbconnection.clear()
+        return render_template("deleteAll.html", result=result)
     else:
         return render_template("deleteAll.html")

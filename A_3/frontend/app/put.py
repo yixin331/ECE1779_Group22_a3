@@ -126,6 +126,7 @@ def put():
             file.seek(0, 0)
 
             city = request.form.get('city')
+            # TODO: if city is empty, get current city using coordinates
             # Store it into location bucket if needed
             if location_needed and len(city) > 0:
                 s3 = boto3.client(
@@ -147,7 +148,7 @@ def put():
             fileToSend = {'file': file}
             response = None
             try:
-                response = requests.post(url='http://localhost:5002/putImage', data=keyToSend, files=fileToSend).json()
+                response = requests.post(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/putImage', data=keyToSend, files=fileToSend).json()
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Manager app loses connection")
             if response is None or response["success"] == "false":

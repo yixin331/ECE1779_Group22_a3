@@ -90,7 +90,7 @@ def upload():
         fileToSend = {'file': file}
         response = None
         try:
-            response = requests.post(url='http://localhost:5002/putImage', data=keyToSend, files=fileToSend).json()
+            response = requests.post(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/putImage', data=keyToSend, files=fileToSend).json()
         except requests.exceptions.ConnectionError as err:
             webapp.logger.warning("Manager app loses connection")
         # put successfully in DB already
@@ -133,7 +133,7 @@ def list_key(key):
     keyToSend = {'key': key}
     response = None
     try:
-        response = requests.post(url='http://localhost:5002/getKey', data=keyToSend).json()
+        response = requests.post(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/getKey', data=keyToSend).json()
     except requests.exceptions.ConnectionError as err:
         webapp.logger.warning("Manager app loses connection")
     if response is None or response["success"] == "false":
@@ -163,7 +163,7 @@ def list_key(key):
             fileToSend = {'file': file_byte}
             webapp.logger.warning('reload into cache')
             try:
-                response = requests.post(url='http://localhost:5002/putImage', data=keyToSend, files=fileToSend).json()
+                response = requests.post(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/putImage', data=keyToSend, files=fileToSend).json()
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Manager app loses connection")
             # successfully get key
@@ -188,7 +188,7 @@ def list_key(key):
 
 @webapp.route('/pop_up', methods=['GET', 'POST'])
 def pop_up():
-    response = requests.get(url='http://localhost:5002/pop_up').json()
+    response = requests.get(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/pop_up').json()
     message = {}
 
     if response['content'] > num_n['old_num']:
