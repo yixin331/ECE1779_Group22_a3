@@ -23,7 +23,7 @@ def refreshMode():
         if mode == 'Manual':
             # pause scheduler
             try:
-                requests.post(url='https://lxu5yc1ifh.execute-api.us-east-1.amazonaws.com/dev/setMode', data=request.form)
+                requests.post(url='http://35.173.213.171:5003/setMode', data=request.form)
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Autoscaler loses connection")
 
@@ -44,7 +44,7 @@ def refreshMode():
             memcache_mode['shrink_ratio'] = float(request.form.get('shrink_ratio'))
             try:
                 dataToSend = {'num_node': memcache_mode['num_node'], 'mode': request.form['mode'], 'max_thr': request.form['max_thr'], 'min_thr': request.form['min_thr'], 'expand_ratio': request.form['expand_ratio'], 'shrink_ratio': request.form['shrink_ratio']}
-                requests.post(url='https://lxu5yc1ifh.execute-api.us-east-1.amazonaws.com/dev/setMode', data=dataToSend)
+                requests.post(url='http://35.173.213.171:5003/setMode', data=dataToSend)
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Autoscaler loses connection")
 

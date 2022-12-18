@@ -13,7 +13,7 @@ def sizeChange():
         numToSend = {'num_node': num}
         response = None
         try:
-            response = requests.post(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/remap', data=numToSend).json()
+            response = requests.post(url='http://35.173.213.171:5002/remap', data=numToSend).json()
         except requests.exceptions.ConnectionError as err:
             webapp.logger.warning("Manager app loses connection")
         if response is None or response["success"] == "false":
