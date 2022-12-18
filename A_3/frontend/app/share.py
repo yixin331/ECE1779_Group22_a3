@@ -28,7 +28,9 @@ def shareAddress():
     webapp.logger.warning(tag)
     # shareTag
     if tag != 'None' and len(tag) > 0:
-        ses_client = boto3.client("ses", region_name=aws_config['region'])
+        ses_client = boto3.client("ses", region_name=aws_config['region'],
+                                  aws_access_key_id=aws_config['access_key_id'],
+                                  aws_secret_access_key=aws_config['secret_access_key'])
 
         bucket_name = '1779' + tag.lower()
         webapp.logger.warning(bucket_name)
@@ -80,7 +82,9 @@ def shareAddress():
     location = request.form.get('location')
     webapp.logger.warning(location)
     if location != 'None' and len(location) > 0:
-        ses_client = boto3.client("ses", region_name=aws_config['region'])
+        ses_client = boto3.client("ses", region_name=aws_config['region'],
+                                  aws_access_key_id=aws_config['access_key_id'],
+                                  aws_secret_access_key=aws_config['secret_access_key'])
         # TODO: add check whether email is ""
         webapp.logger.warning(location)
         webapp.logger.warning(email)
@@ -137,7 +141,9 @@ def shareAddress():
 
 @webapp.route('/verifyEmail', methods=['GET', 'POST'])
 def verifyEmail():
-    ses_client = boto3.client("ses", region_name=aws_config['region'])
+    ses_client = boto3.client("ses", region_name=aws_config['region'],
+                              aws_access_key_id=aws_config['access_key_id'],
+                              aws_secret_access_key=aws_config['secret_access_key'])
     email = request.form.get('email')
 
     webapp.logger.warning(email)

@@ -97,7 +97,9 @@ def put():
             s3.put_object(Bucket=bucket_name, Key=key, Body=file)
             file.seek(0, 0)
             # detect label
-            client = boto3.client('rekognition')
+            client = boto3.client('rekognition', aws_config['region'],
+                                  aws_access_key_id=aws_config['access_key_id'],
+                                  aws_secret_access_key=aws_config['secret_access_key'])
             response = client.detect_labels(Image={'S3Object': {'Bucket': bucket_name, 'Name': key}})
             label = None
             category_list = ['Buildings and Architecture', 'Popular Landmarks', 'Nature and Outdoors',
@@ -122,7 +124,7 @@ def put():
                 aws_secret_access_key=aws_config['secret_access_key']
             )
             create_bucket(bucket_name)
-            s3.put_object(Bucket=bucket_name, Key=key+'.'+extension, Body=file)
+            s3.put_object(Bucket=bucket_name, Key=key + '.' + extension, Body=file)
             file.seek(0, 0)
 
             city = request.form.get('city')
@@ -137,7 +139,7 @@ def put():
                 )
                 bucket_name = 'location' + city.lower()
                 create_bucket(bucket_name)
-                s3.put_object(Bucket=bucket_name, Key=key+'.'+extension, Body=file)
+                s3.put_object(Bucket=bucket_name, Key=key + '.' + extension, Body=file)
             else:
                 city = 'default'
             webapp.logger.warning(city)
@@ -148,7 +150,8 @@ def put():
             fileToSend = {'file': file}
             response = None
             try:
-                response = requests.post(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/putImage', data=keyToSend, files=fileToSend).json()
+                response = requests.post(url='https://adpqg6brrc.execute-api.us-east-1.amazonaws.com/dev/putImage',
+                                         data=keyToSend, files=fileToSend).json()
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Manager app loses connection")
             if response is None or response["success"] == "false":
