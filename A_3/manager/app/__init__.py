@@ -52,7 +52,7 @@ def create_instances():
         aws_secret_access_key=aws_config['secret_access_key']
     )
     USERDATA_SCRIPT = '''#!/bin/bash
-    cd /home/ubuntu/ECE1779_Group22_a2/A_2/memcache
+    cd /home/ubuntu/ECE1779_Group22_a3/A_3/memcache
     pip install flask
     pip install apscheduler
     pip install boto3

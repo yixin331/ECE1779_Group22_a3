@@ -110,14 +110,14 @@ def remap():
     if len(keys_to_sort) > 0:
         cursor = dbconnection.sort_by_time(keys_to_sort)
         for key in cursor:
-            keyToSend = {'key': key[0]}
+            keyToSend = {'key': key}
             try:
                 response = requests.post(url='http://35.173.213.171:5002/map', data=keyToSend).json()
             except requests.exceptions.ConnectionError as err:
                 webapp.logger.warning("Manager app loses connection")
 
             node_address = 'http://' + response["content"] + ':5001/putImage'
-            file = io.BytesIO(base64.b64decode(key_list[key[0]]))
+            file = io.BytesIO(base64.b64decode(key_list[key]))
             fileToSend = {'file': file}
 
             try:
