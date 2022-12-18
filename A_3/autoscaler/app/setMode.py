@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import boto3
 from app.config import aws_config
 import math
+from decimal import *
 
 
 @webapp.route('/setMode', methods=['POST'])
@@ -16,10 +17,10 @@ def setMode():
             scheduler.pause_job('monitor_stats')
     else:
         memcache_mode['num_node'] = int(request.form.get('num_node'))
-        memcache_mode['max_thr'] = float(request.form.get('max_thr'))
-        memcache_mode['min_thr'] = float(request.form.get('min_thr'))
-        memcache_mode['expand_ratio'] = float(request.form.get('expand_ratio'))
-        memcache_mode['shrink_ratio'] = float(request.form.get('shrink_ratio'))
+        memcache_mode['max_thr'] = Decimal(request.form.get('max_thr'))
+        memcache_mode['min_thr'] = Decimal(request.form.get('min_thr'))
+        memcache_mode['expand_ratio'] = Decimal(request.form.get('expand_ratio'))
+        memcache_mode['shrink_ratio'] = Decimal(request.form.get('shrink_ratio'))
         # monitor_stats()
         if scheduler.get_job('monitor_stats'):
             scheduler.resume_job('monitor_stats')

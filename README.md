@@ -11,7 +11,10 @@ If you are still suffering searching for images in Google, please try our applic
 ## General Architecture
 ![Screenshot](architecture.png)
 
-The diagram above shows the general architecture of our application.
+The diagram above shows the general architecture of our application. 
+In this project, we deploy the frontend serverlessly using Zappa but still run the manager app, autoscaler, and memcache on EC2 instances. 
+This is because we need to maintain some states in our manager app, autoscaler, and memcache in order to monitor the performance. 
+However, Zappa kills the server after each request is returned to achieve serverless computing, which will affect our application's behaviour.
 
 When the user wants to add an image to the system, he can choose whether he would like to share the image's location information by entering a city name or getting his current location. 
 Suppose he decides to get his current location. In that case, the frontend will invoke a lambda function that works as a background process that utilizes the Amazon Location Service to retrieve his current city. 
@@ -28,6 +31,10 @@ In addition to the two features mentioned above, the user can share a specific a
 The AWS Simple Email Service helps realize the function by asking the user to verify his email and then sending the email.
 
 ## Run the application
+
 ```
 ./start.sh
 ```
+
+Frontend: 
+https://8w72lx29zc.execute-api.us-east-1.amazonaws.com/dev
