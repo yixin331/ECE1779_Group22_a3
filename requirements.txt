@@ -4,6 +4,6 @@ datetime
 timedelta
 boto3
 wordcloud
-opencv-python
+opencv-python-headless
 requests
 werkzeug
