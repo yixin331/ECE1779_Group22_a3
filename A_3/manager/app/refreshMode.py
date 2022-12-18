@@ -2,6 +2,7 @@ from flask import render_template,redirect, url_for, request, g
 from app import webapp,config, dbconnection, memcache_mode
 import requests
 import boto3
+from decimal import *
 
 
 @webapp.teardown_appcontext
@@ -38,10 +39,10 @@ def refreshMode():
                 dbconnection.put_mode(memcache_mode['num_node'], memcache_mode['mode'], memcache_mode['max_thr'], memcache_mode['min_thr'], memcache_mode['expand_ratio'], memcache_mode['shrink_ratio'])
 
         elif mode == 'Auto':
-            memcache_mode['max_thr'] = float(request.form.get('max_thr'))
-            memcache_mode['min_thr'] = float(request.form.get('min_thr'))
-            memcache_mode['expand_ratio'] = float(request.form.get('expand_ratio'))
-            memcache_mode['shrink_ratio'] = float(request.form.get('shrink_ratio'))
+            memcache_mode['max_thr'] = Decimal(request.form.get('max_thr'))
+            memcache_mode['min_thr'] = Decimal(request.form.get('min_thr'))
+            memcache_mode['expand_ratio'] = Decimal(request.form.get('expand_ratio'))
+            memcache_mode['shrink_ratio'] = Decimal(request.form.get('shrink_ratio'))
             try:
                 dataToSend = {'num_node': memcache_mode['num_node'], 'mode': request.form['mode'], 'max_thr': request.form['max_thr'], 'min_thr': request.form['min_thr'], 'expand_ratio': request.form['expand_ratio'], 'shrink_ratio': request.form['shrink_ratio']}
                 requests.post(url='http://35.173.213.171:5003/setMode', data=dataToSend)
